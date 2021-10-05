@@ -1,0 +1,54 @@
+Description: Create signle EC2 instance template
+
+Parameters:
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t4g.micro
+
+  ImageId:
+    Description: EC2 instance image
+    Type: String
+    Default: ami-0c2d06d50ce30b442
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: DenysTest2
+      ImageId: !Ref ImageId
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroups:
+        - !Ref SSHSecurityGroup
+        - !Ref HTTPSecurityGroup
+
+  SSHSecurityGroup:
+    Description: SSH access
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 SecGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  HTTPSecurityGroup:
+    Description: HTTP access
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 SecGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  PublicIp:
+    Description: EC2 In public IP
+    Value: !GetAtt EC2Instance.PublicIp
