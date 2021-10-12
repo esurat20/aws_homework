@@ -1,0 +1,81 @@
+Description: Create ASG with EC2 instance
+
+Parameters:
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t4g.micro
+
+  ImageId:
+    Description: EC2 instance image
+    Type: String
+    Default: ami-013a129d325529d4d
+
+  ASGMinSize:
+    Description: ASG min size
+    Type: String
+    Default: '0'
+
+  ASGMaxSize:
+    Description: ASG max size
+    Type: String
+    Default: '2'
+
+  ASGDesiredCapacity:
+    Description: ASG Desired Capacity
+    Type: String
+    Default: '2'
+
+Resources:
+  ASGLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: !Ref ImageId
+        InstanceType: !Ref InstanceType
+        UserData:
+          Fn::Base64: !Sub |
+             #!/bin/bash -xe
+             sudo yum update -y
+             sudo yum install java-1.8.0-openjdk -y
+
+        KeyName: DenysTest1
+        SecurityGroups:
+        - !Ref SSHSecurityGroup
+        - !Ref HTTPSecurityGroup
+
+  ASGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      MinSize: !Ref ASGMinSize
+      MaxSize: !Ref ASGMaxSize
+      DesiredCapacity: !Ref ASGDesiredCapacity
+      AvailabilityZones: { "Fn::GetAZs" : "" }
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ASGLaunchTemplate
+        Version: !GetAtt ASGLaunchTemplate.LatestVersionNumber
+
+  SSHSecurityGroup:
+    Description: SSH access
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 SecGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  HTTPSecurityGroup:
+    Description: HTTP access
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 SecGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
