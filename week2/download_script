@@ -1,0 +1,1 @@
+aws s3 cp s3://denys-s3-full-access-bucket/s3-file.txt ./
