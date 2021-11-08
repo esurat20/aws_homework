@@ -2,9 +2,10 @@ resource "aws_instance" "s3_instanse" {
   ami = var.ec2_ami_id
   instance_type = var.ec2_instance_type
   security_groups = [aws_security_group.s3-instanse-http-sg.name, aws_security_group.s3-instanse-ssh-sg.name]
-  iam_instance_profile = aws_iam_instance_profile.s3_profile.name
+  iam_instance_profile = aws_iam_instance_profile.s3_profile_new.name
   key_name = "DenysTest1"
-  user_data = base64encode(file("download_script"))
+  user_data_base64 = filebase64("${path.module}/user-data.sh")
+
 
   tags = {
     Name = "S3-Terraform-Instanse"
@@ -84,8 +85,8 @@ resource "aws_iam_role" "s3-full-access-role" {
   EOF
 }
 
-resource "aws_iam_instance_profile" "s3_profile" {
-  name = "s3_profile"
+resource "aws_iam_instance_profile" "s3_profile_new" {
+  name = "s3_profile_new"
   role = aws_iam_role.s3-full-access-role.name
 }
 
