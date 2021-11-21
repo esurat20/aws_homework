@@ -7,6 +7,7 @@ resource "aws_db_instance" "characters_postgres" {
   password             = "postgres"
   skip_final_snapshot  = true
   allocated_storage    = 10
+  vpc_security_group_ids = [ aws_security_group.data_base_instanse-instanse-rds-sg.id ]
 }
 
 resource "aws_dynamodb_table" "characters_dynamo_db" {
@@ -29,7 +30,7 @@ resource "aws_instance" "data_base_instanse" {
     aws_security_group.data_base_instanse-instanse-ssh-sg.name,
     aws_security_group.data_base_instanse-instanse-rds-sg.name
   ]
-  iam_instance_profile = aws_iam_instance_profile.database_profile_new.name
+  iam_instance_profile = aws_iam_instance_profile.database_profile_new_1.name
   key_name = "DenysTest1"
   user_data_base64 = filebase64("${path.module}/user-data.sh")
 
@@ -273,8 +274,8 @@ resource "aws_iam_role" "database-full-access-role" {
   EOF
 }
 
-resource "aws_iam_instance_profile" "database_profile_new" {
-  name = "database_profile_new"
+resource "aws_iam_instance_profile" "database_profile_new_1" {
+  name = "database_profile_new_1"
   role = aws_iam_role.database-full-access-role.name
 }
 
